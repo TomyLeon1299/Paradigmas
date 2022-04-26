@@ -1,8 +1,11 @@
-#include<stdio.h>
+#include <stdio.h>
 
 int main(void){
 
-    printf("hola");
+    int nro;
+    printf("ingrese un numero: ");
+    scanf("%d", &nro);
+    printf("Su numero es %d", nro);
 
     return 0;
 }
