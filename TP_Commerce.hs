@@ -3,10 +3,10 @@ type Precio = Float
 type Producto = (Nombre, Precio)
 
 precioTotal :: Producto -> Float -> Float -> Float -> Float
-precioTotal (_, precio) cantidad descuento costoDeEnvio = aplicarCostoDeEnvio (aplicarDescuento precio descuento * cantidad) costoDeEnvio
+precioTotal producto cantidad descuento costoDeEnvio = aplicarCostoDeEnvio ((aplicarDescuento producto descuento) * cantidad) costoDeEnvio
 
-productoDeElite :: String -> Bool
-productoDeElite = productoDeLujo nombreProducto && productoCodiciado nombreProducto && (not . productoCorriente) nombreProducto
+productoDeElite :: Producto -> Bool
+productoDeElite producto = productoDeLujo producto && productoCodiciado producto && (not . productoCorriente) producto
 
 aplicarDescuento :: Producto -> Float -> Float
 aplicarDescuento (_, precio) descuento = precio * (descuento / 100)
@@ -14,14 +14,14 @@ aplicarDescuento (_, precio) descuento = precio * (descuento / 100)
 entregaSencilla :: String -> Bool
 entregaSencilla fechaDeEntrega = (even.length) fechaDeEntrega
 
-descodiciarProducto :: Producto -> String
-descodiciarProducto (nombreProducto, _) = take 10 nombreProducto
+descodiciarProducto :: Producto -> Producto
+descodiciarProducto producto = (take 10 (fst producto), snd producto)
 
 productoDeLujo :: Producto -> Bool
 productoDeLujo (nombreProducto, _) = (elem 'x' nombreProducto) || (elem 'z' nombreProducto)
 
-aplicarCostoDeEnvio :: Producto -> Float -> Float
-aplicarCostoDeEnvio (_, precio) costoEnvio = precio + costoEnvio
+aplicarCostoDeEnvio :: Float -> Float -> Float
+aplicarCostoDeEnvio precio costoEnvio = precio + costoEnvio
 
 productoCodiciado :: Producto -> Bool
 productoCodiciado (nombreProducto, _) = (length nombreProducto) > 10
@@ -35,8 +35,8 @@ esVocal unaLetra = elem unaLetra "aeiouAEIOU"
 productoXL :: Producto -> String
 productoXL (nombreProducto, _) = nombreProducto ++ "XL"
 
-versionBarata :: Producto -> String
-versionBarata (nombreProducto, _) = reverse . descodiciarProducto $ nombreProducto
+versionBarata :: Producto -> Producto
+versionBarata producto = (reverse . fst . descodiciarProducto $ producto, snd producto)
 
 --------------------------------
 
