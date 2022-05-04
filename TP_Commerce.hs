@@ -14,8 +14,8 @@ aplicarDescuento (_, precio) descuento = precio * (descuento / 100)
 entregaSencilla :: String -> Bool
 entregaSencilla fechaDeEntrega = (even.length) fechaDeEntrega
 
-descodiciarProducto :: Producto -> Producto
-descodiciarProducto producto = (take 10 (fst producto), snd producto)
+descodiciarProducto :: Producto -> String
+descodiciarProducto (nombreProducto, _) = take 10 nombreProducto
 
 productoDeLujo :: Producto -> Bool
 productoDeLujo (nombreProducto, _) = (elem 'x' nombreProducto) || (elem 'z' nombreProducto)
@@ -32,11 +32,12 @@ productoCorriente (nombreProducto, _) = esVocal . head $ nombreProducto
 esVocal :: Char -> Bool
 esVocal unaLetra = elem unaLetra "aeiouAEIOU"
 
-productoXL :: Producto -> String
-productoXL (nombreProducto, _) = nombreProducto ++ "XL"
+productoXL :: Producto -> Producto
+productoXL producto = ((fst producto) ++ "XL", snd producto)
 
 versionBarata :: Producto -> Producto
-versionBarata producto = (reverse . fst . descodiciarProducto $ producto, snd producto)
+versionBarata producto = (reverse . descodiciarProducto $ producto, snd producto)\
+
 
 --------------------------------
 
