@@ -38,6 +38,7 @@ legado = ("Christopher Paolini", "Legado", 811)
 
 type Biblioteca = [Libro]
 
+miBiblioteca :: [Libro]
 miBiblioteca = [elVisitante, shingeki1, shingeki3, shingeki127, sandman5, sandman10, sandman12, legado, brisignr, eragon, eldest, fundacion]
 
 autor :: Libro -> String
@@ -55,15 +56,15 @@ promedioDePaginas :: Biblioteca -> Int
 promedioDePaginas unaBiblioteca = sumatoriaPaginasBiblioteca unaBiblioteca `div` length unaBiblioteca
 
 sumatoriaPaginasBiblioteca :: Biblioteca -> Int
-sumatoriaPaginasBiblioteca unaBiblioteca = sum . map . paginas $ unaBiblioteca
+sumatoriaPaginasBiblioteca unaBiblioteca = sum . map paginas $ unaBiblioteca
 
 -------------------------------------
 
 lecturaObligatoria :: Libro -> Bool
 lecturaObligatoria unLibro = esDeAutor "Stephen King" unLibro || esDeSagaEragon unLibro || unLibro == fundacion
 
-esDeAutor :: Libro -> Bool
-esDeAutor unAutor unLibro = autor Libro == unAutor
+esDeAutor :: String -> Libro -> Bool
+esDeAutor unAutor unLibro = autor unLibro == unAutor
 
 esDeSagaEragon :: Libro -> Bool
 esDeSagaEragon unLibro = elem (titulo unLibro) ["Eragon", "Eldest", "Legado", "Brisignr"]
@@ -105,6 +106,7 @@ genero unLibro
   | esDeAutor "Stephen King" unLibro = "Terror"
   | esDeAutorJapones         unLibro = "Manga"
   | paginas unLibro < 40             = "Comic"
+  | otherwise = undefined
 
 esDeAutorJapones :: Libro -> Bool
 esDeAutorJapones unLibro = esDeAutor "Hajime Isayama" unLibro

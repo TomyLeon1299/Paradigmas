@@ -83,9 +83,9 @@ gemaMasPoderosa personaje guantelete = (gemaMasPoderosaDe personaje).gemas $ gua
 gemaMasPoderosaDe :: Personaje -> [Gema] -> Gema
 gemaMasPoderosaDe _ [] = id
 gemaMasPoderosaDe _ [gema] = gema
-gemaMasPoderosaDe personaje (gema1:gema2:gemas)
-    | (energia.gema1) personaje < (energia.gema2) personaje = gemaMasPoderosaDe personaje (gema1:gemas)
-    | otherwise = gemaMasPoderosaDe personaje (gema2:gemas)
+gemaMasPoderosaDe personaje (gema1:gema2:lasOtrasGemas)
+    | (energia.gema1) personaje < (energia.gema2) personaje = gemaMasPoderosaDe personaje (gema1:lasOtrasGemas)
+    | otherwise = gemaMasPoderosaDe personaje (gema2:lasOtrasGemas)
 
 -- PUNTO 7
 

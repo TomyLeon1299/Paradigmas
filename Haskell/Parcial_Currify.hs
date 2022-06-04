@@ -1,4 +1,16 @@
+{-
+Parcial Funcional PdeP
+
+Fecha:
+Nombre: Tomás Guillermo León
+Curso: K2001
+Legajo: 1713980
+DNI: 42101908
+-}
+
 import Text.Show.Functions()
+
+-- PUNTO A
 
 data Cancion = Cancion{
     titulo :: String,
@@ -14,92 +26,119 @@ data Artista = Artista{
 
 type Efecto = Cancion -> Cancion
 
--- PARTE A
+-- Mapeos
 
-rocketRaccoon :: Cancion
-rocketRaccoon = Cancion {titulo = "Rocket Raccoon", genero = "a", duracion = 90}
+mapTitulo :: (String -> String) -> Cancion -> Cancion
+mapTitulo unaFuncion cancion = cancion {titulo = unaFuncion . titulo $ cancion}
 
-mientrasMiBateriaFesteja :: Cancion
-mientrasMiBateriaFesteja = Cancion {titulo = "Mientras Mi Bateria Festeja", genero = "a", duracion = 90}
+mapGenero :: (String -> String) -> Cancion -> Cancion
+mapGenero unaFuncion cancion = cancion {genero = unaFuncion . genero $ cancion}
 
-tomateDeMadera :: Cancion
-tomateDeMadera = Cancion {titulo = "Tomate De Madera", genero = "a", duracion = 90}
+mapDuracion :: (Int -> Int) -> Cancion -> Cancion
+mapDuracion unaFuncion cancion = cancion {duracion = unaFuncion . duracion $ cancion}
 
-teAcordas :: Cancion
-teAcordas = Cancion {titulo = "¿Te acordás?", genero = "a", duracion = 90}
+mapNombre :: (String -> String) -> Artista -> Artista
+mapNombre unaFuncion artista = artista {nombre = unaFuncion . nombre $ artista}
 
-unPibeComoVos :: Cancion
-unPibeComoVos = Cancion {titulo = "Un pibe como vos", genero = "a", duracion = 90}
+mapCanciones :: ([Cancion] -> [Cancion]) -> Artista -> Artista
+mapCanciones unaFuncion artista  = artista {canciones = unaFuncion . canciones $ artista}
 
-daleMechaALaLluvia :: Cancion
-daleMechaALaLluvia = Cancion {titulo = "Dale meecha a la lluvia", genero = "a", duracion = 90}
-
-cafeParaDos :: Cancion
-cafeParaDos = Cancion {titulo = "Cafe para dos", genero = "rock melancolico", duracion = 146}
-
-fuiHastaAhi :: Cancion
-fuiHastaAhi = Cancion {titulo = "Fui hasta ahi", genero = "rock", duracion = 279}
-
-losEscarabajos :: Artista
-losEscarabajos = Artista {nombre = "Los escarabajos", canciones = [rocketRaccoon, mientrasMiBateriaFesteja, tomateDeMadera], efectoPreferido = acortar}
-
-adela :: Artista
-adela = Artista {nombre = "Adela", canciones = [teAcordas, unPibeComoVos, daleMechaALaLluvia], efectoPreferido = remixar}
-
-elTigreJoaco :: Artista
-elTigreJoaco = Artista {nombre = "El tigre Joaco", canciones = [], efectoPreferido = acustizar 360}
-
--- efectos
+-- Efectos
 
 acortar :: Efecto
-acortar unaCancion = unaCancion { duracion = max 0 (duracion unaCancion - 60)}
+acortar = mapDuracion (max 0 . subtract 60)
 
 remixar :: Efecto
-remixar unaCancion = unaCancion { titulo = titulo unaCancion ++ "remix", duracion = duracion unaCancion * 2, genero = "remixado"}
+remixar = mapTitulo (++ "remix") . mapDuracion (* 2) . mapGenero (const "remixado")
 
 acustizar :: Int -> Efecto
-acustizar duracionAcustico unaCancion | genero unaCancion /= "acustico" = unaCancion { genero = "acustico", duracion = duracionAcustico}
-                                      | otherwise = unaCancion
+acustizar duracionAcustico cancion
+    | genero cancion /= "acustico" = mapGenero (const "acustico") . mapDuracion (const duracionAcustico) $ cancion
+    | otherwise = cancion
 
 metaEfecto :: [Efecto] -> Efecto
-metaEfecto listaEfectos = foldr1 (.) listaEfectos
+metaEfecto efectos cancion = foldr ($) cancion efectos
+
+-- Canciones
+
+cafeParaDos :: Cancion
+cafeParaDos = Cancion "Café para dos" "rock melancólico" 146
+
+fuiHastaAhi :: Cancion
+fuiHastaAhi = Cancion "Fuí hasta ahí" "rock" 279
+
+losEscarabajos :: Artista
+losEscarabajos = Artista "Los escarabajos" [rocketRaccoon, mientrasMiBateriaFesteja, tomateDeMadera] acortar
+
+adela :: Artista
+adela = Artista "Adela" [teAcordas, unPibeComoVos, daleMechaALaLluvia] remixar
+
+elTigreJoaco :: Artista
+elTigreJoaco = Artista "El tigre Joaco" [] (acustizar 360)
+
+rocketRaccoon :: Cancion
+rocketRaccoon = undefined
+
+mientrasMiBateriaFesteja :: Cancion
+mientrasMiBateriaFesteja = undefined
+
+tomateDeMadera :: Cancion
+tomateDeMadera = undefined
+
+teAcordas :: Cancion
+teAcordas = undefined
+
+unPibeComoVos :: Cancion
+unPibeComoVos = undefined
+
+daleMechaALaLluvia :: Cancion
+daleMechaALaLluvia = undefined
 
 -- PARTE B
 
 vistazo :: Artista -> [Cancion]
-vistazo unArtista = take 3 . filter esCorta $ (canciones unArtista)
+vistazo artista = take 3 . filter esCorta $ (canciones artista)
 
 esCorta :: Cancion -> Bool
-esCorta unaCancion = duracion unaCancion < 150
+esCorta cancion = duracion cancion < 150
 
 playlist :: String -> [Artista] -> [Cancion]
-playlist unGenero artistas = concatMap (cancionesDeGeneroArtista unGenero) artistas
+playlist unGenero artistas = concatMap (cancionesDelGenero unGenero) artistas
 
-cancionesDeGeneroArtista :: String -> Artista -> [Cancion]
-cancionesDeGeneroArtista unGenero unArtista = filter (esDeGenero unGenero) (canciones unArtista)
+cancionesDelGenero :: String -> Artista -> [Cancion]
+cancionesDelGenero unGenero artista = filter (esDeGenero unGenero) (canciones artista)
 
 esDeGenero :: String -> Cancion -> Bool
-esDeGenero unGenero unaCancion = genero unaCancion == unGenero
+esDeGenero unGenero cancion = genero cancion == unGenero
 
--- PARTE C
+-- PUNTO C
+
+hacerseDJ' :: Artista -> Artista
+hacerseDJ' artista = artista {canciones = map (efectoPreferido artista) (canciones artista)}
 
 hacerseDJ :: Artista -> Artista
-hacerseDJ unArtista = unArtista {canciones = map (efectoPreferido unArtista) (canciones unArtista)}
+hacerseDJ artista = mapCanciones (map (efectoPreferido artista)) artista
+
+tieneGustoHomogeneo' :: Artista -> Bool
+tieneGustoHomogeneo' artista = all (esDeGenero.genero.head.canciones $ artista) (canciones artista)
 
 tieneGustoHomogeneo :: Artista -> Bool
-tieneGustoHomogeneo unArtista = all (esDeGenero.genero.head.canciones $ unArtista) (canciones unArtista)
+tieneGustoHomogeneo artista = sonTodosIguales . map genero . canciones $ artista
+
+sonTodosIguales :: Eq a => [a] -> Bool
+sonTodosIguales lista = all (== head lista) lista
 
 formarBanda :: String -> [Artista] -> Artista
 formarBanda nombreBanda artistas = Artista {nombre = nombreBanda, canciones = concatMap canciones artistas, efectoPreferido = metaEfecto (map efectoPreferido artistas)}
 
 obraMaestraProgresiva :: Artista -> Cancion
-obraMaestraProgresiva unArtista = Cancion {titulo = concatMap titulo (canciones unArtista), genero = (foldl1 mejorGenero (map genero.canciones $ unArtista)) ++ " progresivo", duracion = sum.map duracion.canciones $ unArtista}
+obraMaestraProgresiva artista = Cancion {titulo = concatMap titulo (canciones artista), genero = foldl1 mejorGenero (map genero . canciones $ artista), duracion = sum . map duracion . canciones $ artista}
 
 mejorGenero :: String -> String -> String
-mejorGenero "reggaeton" otroGenero = otroGenero
-mejorGenero unGenero "reggaeton" = unGenero
 mejorGenero "rock" _ = "rock"
 mejorGenero _ "rock" = "rock"
+mejorGenero "reggaeton" otroGenero = otroGenero
+mejorGenero unGenero "reggaeton" = unGenero
 mejorGenero unGenero otroGenero
     | length unGenero > length otroGenero = unGenero
     | otherwise = otroGenero
