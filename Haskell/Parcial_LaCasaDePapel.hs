@@ -22,12 +22,12 @@ data Rehen = Rehen{
   nombreRehen :: String,
   complot :: Int,
   miedo :: Int,
-  plan :: Plan
+  plan :: Rebelar
 }deriving(Show)
 
 type Rebelar = Ladron -> Ladron
-type Plan = [Rebelar]
 type Arma = Rehen -> Rehen
+type Intimidar = Ladron -> Arma
 
 -- Mapeo
 
@@ -56,7 +56,7 @@ ametralladora balas = mapComplot (`div` 2) . mapMiedo (* balas)
 
 -- Intimidar
 
-disparos :: Ladron -> Arma
+disparos :: Intimidar
 disparos ladron rehen = (armaMasIntimidante (armas ladron) rehen) rehen
 
 armaMasIntimidante :: [Arma] -> Rehen -> Arma
@@ -66,7 +66,7 @@ armaMasIntimidante (x:xs) rehen
   | miedo (x rehen) > (miedo . (head xs) $ rehen) = armaMasIntimidante (x:(drop 1 xs)) rehen
   | otherwise = armaMasIntimidante xs rehen
 
-hacerseElMalo :: Ladron -> Rehen -> Rehen
+hacerseElMalo :: Intimidar
 hacerseElMalo ladron rehen
   | nombreLadron ladron == "Berlin" = mapMiedo ((+) (length $ foldl1 (++) (habilidades ladron))) rehen
   | nombreLadron ladron == "Rio" = mapComplot ((+) 20) rehen
@@ -91,10 +91,10 @@ profesor :: Ladron
 profesor = Ladron "profesor" ["disfrazarse de linyera", "disfrazarse de payaso", "estar siempre un paso adelante"] []
 
 pablo :: Rehen
-pablo = Rehen "pablo" 40 30 [esconderse]
+pablo = Rehen "pablo" 40 30 esconderse
 
 arturito :: Rehen
-arturito = Rehen "arturito" 70 50 [esconderse, atacarAlLadron pablo]
+arturito = Rehen "arturito" 70 50 (esconderse . atacarAlLadron pablo)
 
 -- 2.
 
@@ -108,13 +108,16 @@ consigueArmaNueva armaNueva = mapArmas (++ [armaNueva])
 
 -- 4.
 
-imitarA :: Rehen -> Ladron -> Ladron
-imitarA rehen ladron = undefined
+imitarA :: Rehen -> Ladron -> Intimidar -> Rehen
+imitarA rehen ladron formaDeIntimidar = formaDeIntimidar ladron rehen
 
 -- 5.
 
 calmarLasAguas :: Ladron -> [Rehen] -> [Rehen]
-calmarLasAguas ladron rehenes = undefined
+calmarLasAguas ladron rehenes = map (disparos ladron) (masDe60DeComplot rehenes)
+
+masDe60DeComplot :: [Rehen] -> [Rehen]
+masDe60DeComplot = filter ((> 60) . complot)
 
 -- 6.
 
@@ -134,12 +137,27 @@ miedoPromedio rehenes = (sum . map miedo $ rehenes) `div` (length rehenes)
 
 -- 8.
 
---seRebelen :: [Rehen] -> Ladron -> Plan -> 
+seRebelen :: [Rehen] -> Rebelar
+seRebelen rehenes ladron = foldr plan ladron (menos10ComplotRehenes rehenes)
+
+menos10ComplotRehenes :: [Rehen] -> [Rehen]
+menos10ComplotRehenes rehenes = map (mapComplot (subtract 10)) rehenes
 
 -- 9.
 
-planValencia :: Plan
-planValencia = undefined
+planValencia :: [Rehen] -> [Ladron] -> Int
+planValencia rehenes ladrones = conCuantoSeVan . rebelarseContraTodos rehenes . armarATodosConAmetralladora $ ladrones
+
+armarATodosConAmetralladora :: [Ladron] -> [Ladron]
+armarATodosConAmetralladora = map (consigueArmaNueva (ametralladora 45))
+
+rebelarseContraTodos :: [Rehen] -> [Ladron] -> [Ladron]
+rebelarseContraTodos rehenes = map (seRebelen rehenes)
+
+conCuantoSeVan :: [Ladron] -> Int
+conCuantoSeVan ladrones = 1000000 * length (concatMap armas ladrones)
+
+--length(map armas ladrones)
 
 -- 10.
 -- No, ya que cuando se quiera ver la cantidad de armas que tienen los ladrones no va a terminar nunca ya que uno tiene infinitas armas, entonces nunca va a terminar de contar dichas armas
