@@ -30,5 +30,5 @@ mata(Asesino, Muerto):-
 % odia(_, milhouse).          devuelve:    false.
 % odia(charles, Nombre).      devuelve:    Nombre = mayordomo.
 % odia(Nombre, agatha).       devuelve:    Nombre = agatha;    Nombre = mayordomo.
-% ??
+% odia(Odiador, Odiado).      
 % odia(mayordomo, _).         devuelve:    true.
